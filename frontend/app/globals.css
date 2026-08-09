@@ -107,19 +107,18 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft);
 .dashboard-main { margin: clamp(5rem, 13vh, 9rem) auto; max-width: 1000px; }
 .sidebar { background: rgb(13 13 13 / 96%); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; padding: 1rem; position: sticky; top: 0; width: 248px; z-index: 20; }
 .sidebar-closed .sidebar { width: 72px; }
-.sidebar svg, .sidebar-edge-toggle svg { fill: none; flex: 0 0 22px; height: 22px; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 22px; }
+.sidebar svg { fill: none; flex: 0 0 22px; height: 22px; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 22px; }
 .sidebar-item { align-items: center; background: transparent; border: 0; border-radius: 9px; color: var(--muted); display: flex; gap: .85rem; min-height: 44px; padding: .65rem .75rem; text-align: left; text-decoration: none; white-space: nowrap; width: 100%; }
 .sidebar-item:hover { background: #1a1a1a; color: var(--text); }
 .sidebar-item.active { background: var(--gold-soft); color: var(--gold); }
 .sidebar-nav { flex: 1; }
 .sidebar-footer { border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: .25rem; padding-top: .75rem; }
 .sidebar-closed .sidebar span { display: none; }
-.settings-card { background: #090909; border: 1px solid var(--line); border-radius: 9px; display: flex; flex-direction: column; gap: .35rem; margin: 0 0 .25rem; overflow: hidden; padding: .8rem; }
-.settings-card strong { font-size: .78rem; }
-.settings-card span { color: var(--muted); font-size: .72rem; overflow: hidden; text-overflow: ellipsis; }
+.settings { cursor: default; }
+.account-email { color: var(--muted); overflow: hidden; padding: 0 .75rem .5rem; text-overflow: ellipsis; white-space: nowrap; }
 .signout { color: #d8d8d8; }
 .signout:hover { color: #ff9f9f; }
-.sidebar-edge-toggle { align-items: center; background: #181818; border: 1px solid var(--line); border-left: 0; border-radius: 0 8px 8px 0; color: var(--muted); display: flex; height: 44px; justify-content: center; left: 248px; padding: 0; position: fixed; top: 1.25rem; transition: left .25s ease, color .2s, background .2s; width: 26px; z-index: 30; }
+.sidebar-edge-toggle { background: #181818; border: 1px solid var(--line); border-left: 0; border-radius: 0 8px 8px 0; color: var(--muted); font-size: 1.5rem; height: 44px; left: 248px; padding: 0; position: fixed; top: 1.25rem; transition: left .25s ease; width: 26px; z-index: 30; }
 .sidebar-edge-toggle:hover { background: #222; color: var(--gold); }
 .sidebar-closed .sidebar-edge-toggle { left: 72px; }
 .sidebar-scrim { display: none; }

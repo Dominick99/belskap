@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { LogoutButton } from "./logout-button";
+import { DashboardShell } from "./dashboard-shell";
 
 const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8000";
 
@@ -16,11 +16,7 @@ export default async function DashboardPage() {
   const user: { email: string } = await response.json();
 
   return (
-    <div className="dashboard">
-      <nav className="dashboard-nav">
-        <div className="wordmark"><span aria-hidden="true">B</span>belskap</div>
-        <LogoutButton />
-      </nav>
+    <DashboardShell email={user.email}>
       <main className="dashboard-main">
         <p className="eyebrow">Signed in as {user.email}</p>
         <h1>Your avatar studio is ready for ideas.</h1>
@@ -30,6 +26,6 @@ export default async function DashboardPage() {
           <p>For now, your account and secure session are up and running.</p>
         </section>
       </main>
-    </div>
+    </DashboardShell>
   );
 }

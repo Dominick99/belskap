@@ -57,7 +57,6 @@ export default function AuthPage() {
     <main className="auth-shell">
       <section className="form-panel" aria-labelledby="auth-title">
         <div className="auth-card">
-          <div className="wordmark"><span aria-hidden="true">B</span>belskap</div>
           <h1 id="auth-title">{mode === "login" ? "Welcome back" : "Create your account"}</h1>
           <p className="form-intro">
             {mode === "login"

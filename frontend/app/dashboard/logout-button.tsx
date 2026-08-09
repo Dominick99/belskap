@@ -11,5 +11,10 @@ export function LogoutButton() {
     router.refresh();
   }
 
-  return <button className="signout" onClick={logout}>Log out</button>;
+  return (
+    <button className="sidebar-item signout" onClick={logout} title="Log out">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg>
+      <span>Log out</span>
+    </button>
+  );
 }

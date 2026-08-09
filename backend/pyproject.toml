@@ -11,9 +11,17 @@ dependencies = [
     "pwdlib[argon2]>=0.2,<1",
     "pydantic-settings>=2.10,<3",
     "psycopg[binary]>=3.2,<4",
+    "pyjwt>=2.10,<3",
     "sqlalchemy>=2.0,<3",
     "uvicorn[standard]>=0.35,<1",
 ]
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
 
 [project.optional-dependencies]
 dev = [

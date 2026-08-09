@@ -10,6 +10,11 @@ class Settings(BaseSettings):
         default="postgresql+psycopg://belskap:belskap@localhost:5432/belskap",
         validation_alias="DATABASE_URL",
     )
+    jwt_secret: str = Field(
+        default="development-only-secret-change-me",
+        validation_alias="JWT_SECRET",
+    )
+    access_token_minutes: int = 60 * 24
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

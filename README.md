@@ -8,7 +8,7 @@ email and password. Passwords are stored as Argon2 hashes, never as plain text.
 ```text
 belskap/
 ├── backend/       FastAPI application, migrations, and tests
-├── frontend/      Placeholder for the future frontend application
+├── frontend/      Next.js authentication UI and dashboard
 └── compose.yaml   Runs the project's containerized services
 ```
 
@@ -21,7 +21,8 @@ and persists PostgreSQL data in a named volume:
 docker compose up --build
 ```
 
-Open the interactive API docs at <http://localhost:8000/docs>.
+Open the frontend at <http://localhost:3000> or the interactive API docs at
+<http://localhost:8000/docs>.
 
 ## Register an account
 

@@ -39,3 +39,32 @@ def test_rejects_invalid_email_and_short_password(client: TestClient) -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_login_returns_token_that_can_fetch_current_user(client: TestClient) -> None:
+    credentials = {"email": "user@example.com", "password": "a secure password"}
+    client.post("/api/v1/auth/register", json=credentials)
+
+    login_response = client.post("/api/v1/auth/login", json=credentials)
+    assert login_response.status_code == 200
+    token = login_response.json()["access_token"]
+
+    me_response = client.get(
+        "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert me_response.status_code == 200
+    assert me_response.json()["email"] == "user@example.com"
+
+
+def test_login_rejects_wrong_password(client: TestClient) -> None:
+    client.post(
+        "/api/v1/auth/register",
+        json={"email": "user@example.com", "password": "a secure password"},
+    )
+
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": "user@example.com", "password": "the wrong password"},
+    )
+
+    assert response.status_code == 401

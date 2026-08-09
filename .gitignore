@@ -5,6 +5,10 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
+.uv-cache/
+.pnpm-store/
 
-# Virtual environments
-.venv
+# Virtual environments and local configuration
+.venv/
+.env

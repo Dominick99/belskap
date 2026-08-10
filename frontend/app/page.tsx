@@ -17,6 +17,7 @@ export default function AuthPage() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +31,9 @@ export default function AuthPage() {
       const response = await fetch(`/api/auth/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(
+          mode === "signup" ? { email, username, password } : { email, password },
+        ),
       });
       const body = await response.json();
 
@@ -72,6 +75,13 @@ export default function AuthPage() {
           <form onSubmit={submit}>
             <label htmlFor="email">Email</label>
             <input id="email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
+
+            {mode === "signup" && (
+              <>
+                <label htmlFor="username">Username</label>
+                <input id="username" type="text" autoComplete="username" placeholder="creative_user" minLength={3} maxLength={30} pattern="[A-Za-z0-9_]+" title="Use 3–30 letters, numbers, or underscores" value={username} onChange={(event) => setUsername(event.target.value)} required />
+              </>
+            )}
 
             <label htmlFor="password">Password</label>
             <input id="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder={mode === "signup" ? "At least 8 characters" : "Your password"} minLength={mode === "signup" ? 8 : 1} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} required />

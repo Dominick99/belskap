@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -23,15 +23,21 @@ router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
     status_code=status.HTTP_201_CREATED,
 )
 def register_user(payload: UserCreate, db: Session = Depends(get_db)) -> User:
-    existing_user = db.scalar(select(User).where(User.email == str(payload.email)))
+    existing_user = db.scalar(
+        select(User).where(
+            or_(User.email == str(payload.email), User.username == payload.username)
+        )
+    )
     if existing_user is not None:
+        field = "email" if existing_user.email == str(payload.email) else "username"
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="An account with this email already exists.",
+            detail=f"An account with this {field} already exists.",
         )
 
     user = User(
         email=str(payload.email),
+        username=payload.username,
         password_hash=hash_password(payload.password),
     )
     db.add(user)
@@ -42,7 +48,7 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)) -> User:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="An account with this email already exists.",
+            detail="An account with this email or username already exists.",
         ) from None
 
     db.refresh(user)

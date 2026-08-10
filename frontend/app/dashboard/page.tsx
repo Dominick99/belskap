@@ -13,12 +13,12 @@ export default async function DashboardPage() {
     cache: "no-store",
   });
   if (!response.ok) redirect("/");
-  const user: { email: string } = await response.json();
+  const user: { email: string; username: string } = await response.json();
 
   return (
     <DashboardShell email={user.email}>
       <main className="dashboard-main">
-        <p className="eyebrow">Signed in as {user.email}</p>
+        <p className="eyebrow">Signed in as @{user.username}</p>
         <h1>Your avatar studio is ready for ideas.</h1>
         <p>This is your home base. Soon, you&apos;ll create avatars and connect AI agents to them here.</p>
         <section className="coming-card">

@@ -1,0 +1,31 @@
+name: Backend tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: true
+          working-directory: backend
+
+      - name: Install Python
+        run: uv python install 3.12
+
+      - name: Run tests
+        run: uv run --frozen --extra dev python -m pytest

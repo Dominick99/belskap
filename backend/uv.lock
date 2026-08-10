@@ -123,7 +123,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.116,<1" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.28,<1" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.4,<4" },
-    { name = "pwdlib", extras = ["argon2"], specifier = ">=0.2,<1" },
+    { name = "pwdlib", extras = ["argon2"], specifier = ">=0.3.0,<1" },
     { name = "pydantic-settings", specifier = ">=2.10,<3" },
     { name = "pyjwt", specifier = ">=2.10,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4,<9" },

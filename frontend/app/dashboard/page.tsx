@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { DashboardShell } from "./dashboard-shell";
 
 const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8000";
 
@@ -16,16 +15,14 @@ export default async function DashboardPage() {
   const user: { email: string; username: string } = await response.json();
 
   return (
-    <DashboardShell email={user.email}>
       <main className="dashboard-main">
         <p className="eyebrow">Signed in as @{user.username}</p>
         <h1>Your avatar studio is ready for ideas.</h1>
-        <p>This is your home base. Soon, you&apos;ll create avatars and connect AI agents to them here.</p>
+        <p>This is your home base. Create and shape the digital personalities in your studio.</p>
         <section className="coming-card">
-          <h2>Avatar creation is coming next</h2>
-          <p>For now, your account and secure session are up and running.</p>
+          <h2>Your characters, all in one place</h2>
+          <p>Visit Avatars to browse profiles and their image and video libraries.</p>
         </section>
       </main>
-    </DashboardShell>
   );
 }

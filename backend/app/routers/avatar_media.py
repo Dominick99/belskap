@@ -1,6 +1,9 @@
 import uuid
+from io import BytesIO
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from PIL import Image, UnidentifiedImageError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -9,9 +12,16 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import Avatar, AvatarMedia, User
 from app.schemas import AvatarMediaCreate, AvatarMediaResponse, AvatarMediaUpdate
+from app.storage import delete_object, upload_object
 
 
 router = APIRouter(prefix="/api/v1/avatars/{avatar_id}/media", tags=["avatar media"])
+MAX_IMAGE_BYTES = 10 * 1024 * 1024
+IMAGE_FORMATS = {
+    "JPEG": ("jpg", "image/jpeg"),
+    "PNG": ("png", "image/png"),
+    "WEBP": ("webp", "image/webp"),
+}
 
 
 def get_owned_avatar(avatar_id: uuid.UUID, user: User, db: Session) -> Avatar:
@@ -62,6 +72,64 @@ def create_avatar_media(
             status_code=status.HTTP_409_CONFLICT,
             detail="This storage key is already in use.",
         ) from None
+    db.refresh(media)
+    return media
+
+
+@router.post(
+    "/upload-image",
+    response_model=AvatarMediaResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_avatar_image(
+    avatar_id: uuid.UUID,
+    image: Annotated[UploadFile, File(description="JPEG, PNG, or WebP image")],
+    set_as_profile: bool = False,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> AvatarMedia:
+    avatar = get_owned_avatar(avatar_id, user, db)
+    contents = await image.read(MAX_IMAGE_BYTES + 1)
+    if len(contents) > MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="Image must be 10 MB or smaller.")
+
+    try:
+        with Image.open(BytesIO(contents)) as decoded:
+            decoded.verify()
+        with Image.open(BytesIO(contents)) as decoded:
+            image_format = decoded.format or ""
+            width, height = decoded.size
+    except (UnidentifiedImageError, OSError):
+        raise HTTPException(status_code=422, detail="File is not a valid image.") from None
+
+    format_details = IMAGE_FORMATS.get(image_format)
+    if format_details is None:
+        raise HTTPException(status_code=422, detail="Image must be JPEG, PNG, or WebP.")
+    extension, mime_type = format_details
+    storage_key = f"avatars/{avatar.id}/images/{uuid.uuid4()}.{extension}"
+
+    try:
+        upload_object(BytesIO(contents), storage_key, mime_type)
+        media = AvatarMedia(
+            avatar_id=avatar.id,
+            media_type="image",
+            storage_key=storage_key,
+            mime_type=mime_type,
+            width=width,
+            height=height,
+        )
+        db.add(media)
+        db.flush()
+        if set_as_profile:
+            avatar.profile_media_id = media.id
+        db.commit()
+    except Exception:
+        db.rollback()
+        try:
+            delete_object(storage_key)
+        except Exception:
+            pass
+        raise
     db.refresh(media)
     return media
 
@@ -120,6 +188,8 @@ def delete_avatar_media(
     if avatar.profile_media_id == media.id:
         avatar.profile_media_id = None
         db.flush()
+    storage_key = media.storage_key
     db.delete(media)
     db.commit()
+    delete_object(storage_key)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

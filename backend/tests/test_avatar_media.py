@@ -1,4 +1,8 @@
+from io import BytesIO
+
 from fastapi.testclient import TestClient
+from PIL import Image
+from pytest import MonkeyPatch
 
 from tests.test_avatars import register_and_authenticate
 
@@ -13,7 +17,10 @@ def create_avatar(client: TestClient, headers: dict[str, str]) -> dict:
     return response.json()
 
 
-def test_avatar_media_crud_and_profile_selection(client: TestClient) -> None:
+def test_avatar_media_crud_and_profile_selection(
+    client: TestClient, monkeypatch: MonkeyPatch
+) -> None:
+    monkeypatch.setattr("app.routers.avatar_media.delete_object", lambda key: None)
     headers = register_and_authenticate(client)
     avatar = create_avatar(client, headers)
     media_url = f"/api/v1/avatars/{avatar['id']}/media"
@@ -58,6 +65,47 @@ def test_avatar_media_crud_and_profile_selection(client: TestClient) -> None:
     assert client.delete(f"{media_url}/{media['id']}", headers=headers).status_code == 204
     avatar_response = client.get(f"/api/v1/avatars/{avatar['id']}", headers=headers)
     assert avatar_response.json()["profile_media_id"] is None
+
+
+def test_uploads_validated_profile_image(
+    client: TestClient, monkeypatch: MonkeyPatch
+) -> None:
+    uploaded: dict[str, object] = {}
+
+    def fake_upload(file, key: str, content_type: str) -> None:
+        uploaded.update(key=key, content_type=content_type, contents=file.read())
+
+    monkeypatch.setattr("app.routers.avatar_media.upload_object", fake_upload)
+    headers = register_and_authenticate(client)
+    avatar = create_avatar(client, headers)
+    image = BytesIO()
+    Image.new("RGB", (64, 48), color="gold").save(image, format="PNG")
+
+    response = client.post(
+        f"/api/v1/avatars/{avatar['id']}/media/upload-image?set_as_profile=true",
+        headers=headers,
+        files={"image": ("profile.png", image.getvalue(), "image/png")},
+    )
+
+    assert response.status_code == 201
+    media = response.json()
+    assert media["mime_type"] == "image/png"
+    assert media["width"] == 64
+    assert media["height"] == 48
+    assert uploaded["content_type"] == "image/png"
+    avatar_response = client.get(f"/api/v1/avatars/{avatar['id']}", headers=headers)
+    assert avatar_response.json()["profile_media_id"] == media["id"]
+
+
+def test_rejects_file_that_is_not_an_image(client: TestClient) -> None:
+    headers = register_and_authenticate(client)
+    avatar = create_avatar(client, headers)
+    response = client.post(
+        f"/api/v1/avatars/{avatar['id']}/media/upload-image",
+        headers=headers,
+        files={"image": ("fake.png", b"not really an image", "image/png")},
+    )
+    assert response.status_code == 422
 
 
 def test_video_cannot_be_selected_as_profile_media(client: TestClient) -> None:

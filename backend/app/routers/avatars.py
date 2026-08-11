@@ -9,6 +9,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import Avatar, AvatarMedia, User
 from app.schemas import AvatarCreate, AvatarResponse, AvatarUpdate
+from app.storage import delete_object
 
 
 router = APIRouter(prefix="/api/v1/avatars", tags=["avatars"])
@@ -115,6 +116,9 @@ def delete_avatar(
     db: Session = Depends(get_db),
 ) -> Response:
     avatar = get_owned_avatar(avatar_id, user, db)
+    storage_keys = [media.storage_key for media in avatar.media]
     db.delete(avatar)
     db.commit()
+    for storage_key in storage_keys:
+        delete_object(storage_key)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

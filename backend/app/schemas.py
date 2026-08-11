@@ -52,6 +52,11 @@ class AvatarVisibility(StrEnum):
     PUBLIC = "public"
 
 
+class AvatarMediaType(StrEnum):
+    IMAGE = "image"
+    VIDEO = "video"
+
+
 class AvatarCreate(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     slug: str = Field(
@@ -70,7 +75,6 @@ class AvatarCreate(BaseModel):
     def normalize_slug(cls, value: str) -> str:
         return value.strip().lower() if isinstance(value, str) else value
 
-
 class AvatarUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=80)
     slug: str | None = Field(
@@ -81,6 +85,7 @@ class AvatarUpdate(BaseModel):
     )
     bio: str | None = Field(default=None, max_length=2000)
     visibility: AvatarVisibility | None = None
+    profile_media_id: uuid.UUID | None = None
 
     @field_validator("name", "bio", mode="before")
     @classmethod
@@ -107,6 +112,55 @@ class AvatarResponse(BaseModel):
     slug: str
     bio: str | None
     visibility: AvatarVisibility
+    profile_media_id: uuid.UUID | None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AvatarMediaCreate(BaseModel):
+    media_type: AvatarMediaType
+    storage_key: str = Field(min_length=1, max_length=1024)
+    thumbnail_key: str | None = Field(default=None, max_length=1024)
+    mime_type: str | None = Field(default=None, max_length=100)
+    width: int | None = Field(default=None, gt=0)
+    height: int | None = Field(default=None, gt=0)
+    duration_seconds: float | None = Field(default=None, gt=0)
+
+    @field_validator("storage_key", "thumbnail_key", "mime_type", mode="before")
+    @classmethod
+    def normalize_optional_text(cls, value: str | None) -> str | None:
+        if not isinstance(value, str):
+            return value
+        return value.strip() or None
+
+
+class AvatarMediaUpdate(BaseModel):
+    thumbnail_key: str | None = Field(default=None, max_length=1024)
+    mime_type: str | None = Field(default=None, max_length=100)
+    width: int | None = Field(default=None, gt=0)
+    height: int | None = Field(default=None, gt=0)
+    duration_seconds: float | None = Field(default=None, gt=0)
+
+    @field_validator("thumbnail_key", "mime_type", mode="before")
+    @classmethod
+    def normalize_optional_text(cls, value: str | None) -> str | None:
+        if not isinstance(value, str):
+            return value
+        return value.strip() or None
+
+
+class AvatarMediaResponse(BaseModel):
+    id: uuid.UUID
+    avatar_id: uuid.UUID
+    media_type: AvatarMediaType
+    storage_key: str
+    thumbnail_key: str | None
+    mime_type: str | None
+    width: int | None
+    height: int | None
+    duration_seconds: float | None
     created_at: datetime
     updated_at: datetime
 

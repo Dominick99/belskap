@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user
-from app.models import Avatar, User
+from app.models import Avatar, AvatarMedia, User
 from app.schemas import AvatarCreate, AvatarResponse, AvatarUpdate
 
 
@@ -77,7 +77,23 @@ def update_avatar(
     db: Session = Depends(get_db),
 ) -> Avatar:
     avatar = get_owned_avatar(avatar_id, user, db)
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    changes = payload.model_dump(exclude_unset=True)
+    profile_media_id = changes.get("profile_media_id")
+    if profile_media_id is not None:
+        profile_media = db.scalar(
+            select(AvatarMedia).where(
+                AvatarMedia.id == profile_media_id,
+                AvatarMedia.avatar_id == avatar.id,
+                AvatarMedia.media_type == "image",
+            )
+        )
+        if profile_media is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Profile media must be an image belonging to this avatar.",
+            )
+
+    for field, value in changes.items():
         setattr(avatar, field, value)
 
     try:

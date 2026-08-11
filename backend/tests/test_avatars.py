@@ -34,6 +34,7 @@ def test_avatar_crud(client: TestClient) -> None:
     avatar = create_response.json()
     assert avatar["name"] == "Luna Vale"
     assert avatar["slug"] == "luna-vale"
+    assert avatar["profile_media_id"] is None
     assert avatar["visibility"] == "public"
     assert "status" not in avatar
 
@@ -44,7 +45,10 @@ def test_avatar_crud(client: TestClient) -> None:
     update_response = client.patch(
         f"/api/v1/avatars/{avatar['id']}",
         headers=headers,
-        json={"bio": "An updated biography.", "visibility": "unlisted"},
+        json={
+            "bio": "An updated biography.",
+            "visibility": "unlisted",
+        },
     )
     assert update_response.status_code == 200
     assert update_response.json()["bio"] == "An updated biography."

@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime
 
+from enum import StrEnum
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
@@ -42,3 +44,70 @@ class UserLogin(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class AvatarVisibility(StrEnum):
+    PRIVATE = "private"
+    UNLISTED = "unlisted"
+    PUBLIC = "public"
+
+
+class AvatarCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    slug: str = Field(
+        min_length=1, max_length=80, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    )
+    bio: str | None = Field(default=None, max_length=2000)
+    visibility: AvatarVisibility = AvatarVisibility.PRIVATE
+
+    @field_validator("name", "bio", mode="before")
+    @classmethod
+    def strip_text(cls, value: str | None) -> str | None:
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("slug", mode="before")
+    @classmethod
+    def normalize_slug(cls, value: str) -> str:
+        return value.strip().lower() if isinstance(value, str) else value
+
+
+class AvatarUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=80)
+    slug: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=80,
+        pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+    )
+    bio: str | None = Field(default=None, max_length=2000)
+    visibility: AvatarVisibility | None = None
+
+    @field_validator("name", "bio", mode="before")
+    @classmethod
+    def strip_text(cls, value: str | None) -> str | None:
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("slug", mode="before")
+    @classmethod
+    def normalize_slug(cls, value: str | None) -> str | None:
+        return value.strip().lower() if isinstance(value, str) else value
+
+    @field_validator("name", "slug", "visibility")
+    @classmethod
+    def prevent_null_required_fields(cls, value: object) -> object:
+        if value is None:
+            raise ValueError("Field cannot be null.")
+        return value
+
+
+class AvatarResponse(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    name: str
+    slug: str
+    bio: str | None
+    visibility: AvatarVisibility
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

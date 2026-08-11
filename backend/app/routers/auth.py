@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models import User
 from app.schemas import TokenResponse, UserCreate, UserLogin, UserResponse
 from app.security import (
     create_access_token,
-    decode_access_token,
     hash_password,
     verify_password,
 )
@@ -68,16 +68,7 @@ def login(payload: UserLogin, db: Session = Depends(get_db)) -> TokenResponse:
 
 
 @router.get("/me", response_model=UserResponse)
-def get_current_user(
-    authorization: str | None = Header(default=None),
-    db: Session = Depends(get_db),
+def read_current_user(
+    user: User = Depends(get_current_user),
 ) -> User:
-    scheme, _, token = (authorization or "").partition(" ")
-    user_id = decode_access_token(token) if scheme.lower() == "bearer" else None
-    user = db.get(User, user_id) if user_id is not None else None
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required.",
-        )
     return user

@@ -1,6 +1,6 @@
 FROM node:26-alpine AS dependencies
 WORKDIR /app
-RUN corepack enable
+RUN npm install --global pnpm@11.15.1
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
@@ -8,7 +8,7 @@ FROM node:26-alpine AS builder
 WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
-RUN corepack enable && pnpm build
+RUN npm install --global pnpm@11.15.1 && pnpm build
 
 FROM node:26-alpine AS runner
 WORKDIR /app

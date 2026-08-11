@@ -62,7 +62,7 @@ class AvatarCreate(BaseModel):
     slug: str = Field(
         min_length=1, max_length=80, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
     )
-    bio: str | None = Field(default=None, max_length=2000)
+    bio: str | None = Field(default=None, max_length=20000)
     visibility: AvatarVisibility = AvatarVisibility.PRIVATE
 
     @field_validator("name", "bio", mode="before")
@@ -83,7 +83,7 @@ class AvatarUpdate(BaseModel):
         max_length=80,
         pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
     )
-    bio: str | None = Field(default=None, max_length=2000)
+    bio: str | None = Field(default=None, max_length=20000)
     visibility: AvatarVisibility | None = None
     profile_media_id: uuid.UUID | None = None
 

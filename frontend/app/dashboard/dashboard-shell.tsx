@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ReactNode, useState } from "react";
 import { LogoutButton } from "./logout-button";
 
@@ -10,15 +12,20 @@ type DashboardShellProps = {
 
 export function DashboardShell({ children, email }: DashboardShellProps) {
   const [open, setOpen] = useState(true);
+  const pathname = usePathname();
 
   return (
     <div className={`dashboard ${open ? "sidebar-open" : "sidebar-closed"}`}>
       <aside className="sidebar" aria-label="Main navigation">
         <nav className="sidebar-nav">
-          <a className="sidebar-item active" href="/dashboard">
+          <Link className={`sidebar-item ${pathname === "/dashboard" ? "active" : ""}`} href="/dashboard">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" /></svg>
             <span>Home</span>
-          </a>
+          </Link>
+          <Link className={`sidebar-item ${pathname.startsWith("/dashboard/avatars") ? "active" : ""}`} href="/dashboard/avatars">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0M19 5v6M16 8h6" /></svg>
+            <span>Avatars</span>
+          </Link>
         </nav>
 
         <div className="sidebar-footer">

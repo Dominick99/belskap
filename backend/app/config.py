@@ -15,6 +15,11 @@ class Settings(BaseSettings):
         validation_alias="JWT_SECRET",
     )
     access_token_minutes: int = 60 * 24
+    s3_endpoint_url: str | None = Field(default=None, validation_alias="S3_ENDPOINT_URL")
+    s3_access_key: str = Field(default="minioadmin", validation_alias="S3_ACCESS_KEY")
+    s3_secret_key: str = Field(default="minioadmin", validation_alias="S3_SECRET_KEY")
+    s3_bucket: str = Field(default="belskap-media", validation_alias="S3_BUCKET")
+    s3_region: str = Field(default="us-east-1", validation_alias="S3_REGION")
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

@@ -17,8 +17,16 @@ export async function POST(request: Request) {
   const token = (await cookies()).get("belskap_session")?.value;
   if (!token) return NextResponse.json({ detail: "Authentication required." }, { status: 401 });
 
-  const body = await request.json();
-  const baseSlug = slugify(body.name ?? "");
+  const form = await request.formData();
+  const image = form.get("image");
+  const name = String(form.get("name") ?? "");
+  const bio = String(form.get("bio") ?? "");
+  const visibility = String(form.get("visibility") ?? "private");
+  if (!(image instanceof File)) {
+    return NextResponse.json({ detail: "A profile image is required." }, { status: 422 });
+  }
+
+  const baseSlug = slugify(name);
   let response: Response | null = null;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -30,9 +38,9 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: body.name,
-        bio: body.bio,
-        visibility: body.visibility,
+        name,
+        bio,
+        visibility,
         slug,
       }),
     });
@@ -40,6 +48,22 @@ export async function POST(request: Request) {
   }
 
   if (!response) return NextResponse.json({ detail: "Unable to create avatar." }, { status: 500 });
-  const result = await response.json();
-  return NextResponse.json(result, { status: response.status });
+  const avatar = await response.json();
+  if (!response.ok) return NextResponse.json(avatar, { status: response.status });
+
+  const upload = new FormData();
+  upload.append("image", image);
+  const uploadResponse = await fetch(
+    `${backendUrl}/api/v1/avatars/${avatar.id}/media/upload-image?set_as_profile=true`,
+    { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: upload },
+  );
+  const media = await uploadResponse.json();
+  if (!uploadResponse.ok) {
+    await fetch(`${backendUrl}/api/v1/avatars/${avatar.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return NextResponse.json(media, { status: uploadResponse.status });
+  }
+  return NextResponse.json({ ...avatar, profile_media_id: media.id }, { status: 201 });
 }

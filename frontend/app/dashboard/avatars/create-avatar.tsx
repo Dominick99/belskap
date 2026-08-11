@@ -1,28 +1,18 @@
 "use client";
 
-/* Object URL previews are local browser resources and cannot use next/image. */
-/* eslint-disable @next/next/no-img-element */
-
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export function CreateAvatar() {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedImageName, setSelectedImageName] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
-
   function selectImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    setPreviewUrl((current) => {
-      if (current) URL.revokeObjectURL(current);
-      return file ? URL.createObjectURL(file) : null;
-    });
+    setSelectedImageName(file?.name ?? null);
   }
 
   function closeDialog() {
@@ -39,12 +29,7 @@ export function CreateAvatar() {
     try {
       const response = await fetch("/api/avatars", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.get("name"),
-          bio: form.get("bio"),
-          visibility: form.get("visibility"),
-        }),
+        body: form,
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.detail ?? "Avatar creation failed.");
@@ -73,11 +58,12 @@ export function CreateAvatar() {
             <button className="dialog-close" type="button" aria-label="Close" onClick={closeDialog}>×</button>
           </div>
 
-          <label className={`image-dropzone ${previewUrl ? "has-preview" : ""}`}>
-            {previewUrl ? <img alt="Selected avatar preview" src={previewUrl} /> : <><span aria-hidden="true">+</span><strong>Choose a profile image</strong><small>PNG, JPG, or WebP</small></>}
+          <label className={`image-dropzone ${selectedImageName ? "has-selection" : ""}`}>
+            <span aria-hidden="true">{selectedImageName ? "✓" : "+"}</span>
+            <strong>{selectedImageName ?? "Choose a profile image"}</strong>
+            <small>{selectedImageName ? "Click to choose a different image" : "PNG, JPG, or WebP · 10 MB maximum"}</small>
             <input accept="image/png,image/jpeg,image/webp" name="image" onChange={selectImage} required type="file" />
           </label>
-          <p className="storage-note">Image upload will be connected when media storage is added. Your selection is currently used only as a preview.</p>
 
           <label htmlFor="avatar-name">Name</label>
           <input id="avatar-name" maxLength={80} name="name" placeholder="Luna Vale" required />

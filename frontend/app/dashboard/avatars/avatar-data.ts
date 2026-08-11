@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8000";
-const mediaBaseUrl = process.env.NEXT_PUBLIC_MEDIA_BASE_URL?.replace(/\/$/, "");
 
 export type Avatar = {
   id: string;
@@ -59,5 +58,5 @@ export async function getAvatarMedia(id: string): Promise<AvatarMedia[]> {
 export function mediaUrl(key: string | null): string | null {
   if (!key) return null;
   if (/^https?:\/\//.test(key)) return key;
-  return mediaBaseUrl ? `${mediaBaseUrl}/${key.replace(/^\//, "")}` : null;
+  return `/api/media?key=${encodeURIComponent(key)}`;
 }

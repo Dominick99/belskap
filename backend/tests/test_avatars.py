@@ -95,6 +95,30 @@ def test_user_cannot_access_another_users_avatar(client: TestClient) -> None:
         f"/api/v1/avatars/{avatar['id']}", headers=second_headers
     ).status_code == 404
 
+    assert client.get(
+        "/api/v1/users/test_user/avatars/luna", headers=second_headers
+    ).status_code == 404
+
+
+def test_reads_owned_avatar_by_username_and_slug(client: TestClient) -> None:
+    headers = register_and_authenticate(client)
+    avatar = client.post(
+        "/api/v1/avatars",
+        headers=headers,
+        json={"name": "Luna", "slug": "luna"},
+    ).json()
+
+    response = client.get(
+        "/api/v1/users/test_user/avatars/luna", headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json()["id"] == avatar["id"]
+    assert client.get(
+        "/api/v1/users/test_user/avatars/missing", headers=headers
+    ).status_code == 404
+    assert client.get("/api/v1/users/test_user/avatars/luna").status_code == 401
+
 
 def test_rejects_invalid_slug_and_visibility(client: TestClient) -> None:
     headers = register_and_authenticate(client)

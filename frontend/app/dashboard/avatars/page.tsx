@@ -1,13 +1,13 @@
 /* Dynamic avatar media can come from user-configured storage hosts. */
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { Avatar, AvatarMedia, getAvatarMedia, getAvatars, mediaUrl } from "./avatar-data";
+import { Avatar, AvatarMedia, getAvatarMedia, getAvatars, getCurrentUser, mediaUrl } from "./avatar-data";
 import { CreateAvatar } from "./create-avatar";
 
 type AvatarPreview = { avatar: Avatar; profileMedia: AvatarMedia | null; mediaCount: number };
 
 export default async function AvatarsPage() {
-  const avatars = await getAvatars();
+  const [avatars, user] = await Promise.all([getAvatars(), getCurrentUser()]);
   const previews: AvatarPreview[] = await Promise.all(
     avatars.map(async (avatar) => {
       const media = await getAvatarMedia(avatar.id);
@@ -29,7 +29,7 @@ export default async function AvatarsPage() {
         </div>
         <div className="avatar-heading-actions">
           <span className="avatar-total">{avatars.length} {avatars.length === 1 ? "avatar" : "avatars"}</span>
-          <CreateAvatar />
+          <CreateAvatar username={user.username} />
         </div>
       </header>
 
@@ -38,7 +38,7 @@ export default async function AvatarsPage() {
           {previews.map(({ avatar, profileMedia, mediaCount }) => {
             const src = mediaUrl(profileMedia?.thumbnail_key ?? profileMedia?.storage_key ?? null);
             return (
-              <Link className="avatar-preview-card" href={`/dashboard/avatars/${avatar.id}`} key={avatar.id}>
+              <Link className="avatar-preview-card" href={`/dashboard/${user.username}/avatars/${avatar.slug}`} key={avatar.id}>
                 <div className="avatar-preview-visual">
                   {src ? <img alt={`${avatar.name} profile`} src={src} /> : <span>{avatar.name.slice(0, 1).toUpperCase()}</span>}
                   <span className={`visibility-badge ${avatar.visibility}`}>{avatar.visibility}</span>
@@ -64,7 +64,7 @@ export default async function AvatarsPage() {
           <p className="eyebrow">Your cast is waiting</p>
           <h2>No avatars yet</h2>
           <p>Once you create an avatar, its profile will appear here.</p>
-          <CreateAvatar />
+          <CreateAvatar username={user.username} />
         </section>
       )}
     </main>

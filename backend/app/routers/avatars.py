@@ -13,6 +13,7 @@ from app.storage import delete_object
 
 
 router = APIRouter(prefix="/api/v1/avatars", tags=["avatars"])
+profile_router = APIRouter(prefix="/api/v1/users", tags=["avatars"])
 
 
 def get_owned_avatar(avatar_id: uuid.UUID, user: User, db: Session) -> Avatar:
@@ -59,6 +60,30 @@ def list_avatars(
             .order_by(Avatar.created_at.desc())
         )
     )
+
+
+@profile_router.get("/{username}/avatars/{slug}", response_model=AvatarResponse)
+def read_avatar_by_username_and_slug(
+    username: str,
+    slug: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Avatar:
+    avatar = db.scalar(
+        select(Avatar)
+        .join(User, Avatar.user_id == User.id)
+        .where(
+            User.id == user.id,
+            User.username == username,
+            Avatar.slug == slug,
+        )
+    )
+    if avatar is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Avatar not found.",
+        )
+    return avatar
 
 
 @router.get("/{avatar_id}", response_model=AvatarResponse)

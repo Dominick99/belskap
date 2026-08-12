@@ -29,6 +29,12 @@ export type AvatarMedia = {
   updated_at: string;
 };
 
+export type CurrentUser = {
+  id: string;
+  email: string;
+  username: string;
+};
+
 async function authenticatedFetch(path: string) {
   const token = (await cookies()).get("belskap_session")?.value;
   if (!token) redirect("/");
@@ -43,6 +49,19 @@ async function authenticatedFetch(path: string) {
 export async function getAvatars(): Promise<Avatar[]> {
   const response = await authenticatedFetch("/api/v1/avatars");
   return response.ok ? response.json() : [];
+}
+
+export async function getCurrentUser(): Promise<CurrentUser> {
+  const response = await authenticatedFetch("/api/v1/auth/me");
+  if (!response.ok) redirect("/");
+  return response.json();
+}
+
+export async function getAvatarBySlug(username: string, slug: string): Promise<Avatar | null> {
+  const response = await authenticatedFetch(
+    `/api/v1/users/${encodeURIComponent(username)}/avatars/${encodeURIComponent(slug)}`,
+  );
+  return response.ok ? response.json() : null;
 }
 
 export async function getAvatar(id: string): Promise<Avatar | null> {

@@ -3,7 +3,7 @@
 import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function CreateAvatar() {
+export function CreateAvatar({ username }: { username: string }) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [selectedImageName, setSelectedImageName] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export function CreateAvatar() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.detail ?? "Avatar creation failed.");
       closeDialog();
-      router.push(`/dashboard/avatars/${body.id}`);
+      router.push(`/dashboard/${username}/avatars/${body.slug}`);
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Avatar creation failed.");

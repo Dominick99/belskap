@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -21,7 +22,6 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -60,6 +60,10 @@ export default function AuthPage() {
     <main className="auth-shell">
       <section className="form-panel" aria-labelledby="auth-title">
         <div className="auth-card">
+          <div className="auth-logo" aria-label="Belskap">
+            <Image className="wordmark-glyph" src="/belskap-wordmark-mark.png" alt="" width={900} height={1065} priority />
+            <span className="wordmark-letters">ELSKAP</span>
+          </div>
           <h1 id="auth-title">{mode === "login" ? "Welcome back" : "Create your account"}</h1>
           <p className="form-intro">
             {mode === "login"

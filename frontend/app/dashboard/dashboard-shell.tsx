@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactNode, useState } from "react";
 import { LogoutButton } from "./logout-button";
@@ -17,6 +18,13 @@ export function DashboardShell({ children, email }: DashboardShellProps) {
   return (
     <div className={`dashboard ${open ? "sidebar-open" : "sidebar-closed"}`}>
       <aside className="sidebar" aria-label="Main navigation">
+        <Link className="sidebar-brand" href="/dashboard" aria-label="Belskap home">
+          <span className="sidebar-wordmark">
+            <Image className="wordmark-glyph" src="/belskap-wordmark-mark.png" alt="" width={900} height={1065} priority />
+            <span className="wordmark-letters">ELSKAP</span>
+          </span>
+          <Image className="sidebar-mark" src="/belskap-mark.png" alt="" width={320} height={320} priority />
+        </Link>
         <nav className="sidebar-nav">
           <Link className={`sidebar-item ${pathname === "/dashboard" ? "active" : ""}`} href="/dashboard">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" /></svg>

@@ -36,7 +36,6 @@ button { cursor: pointer; }
 }
 
 .form-panel { max-width: 440px; width: 100%; }
-
 .auth-card {
   background: rgb(17 17 17 / 94%);
   border: 1px solid var(--line);
@@ -45,6 +44,31 @@ button { cursor: pointer; }
   padding: clamp(1.6rem, 5vw, 2.6rem);
   width: 100%;
 }
+
+.auth-logo {
+  align-items: flex-end;
+  display: flex;
+  gap: .12rem;
+  justify-content: center;
+  margin: 0 auto 1.65rem;
+}
+
+.auth-logo .wordmark-glyph {
+  height: 68px;
+  object-fit: contain;
+  width: 68px;
+}
+
+.wordmark-letters {
+  color: #f7f7f7;
+  font-weight: 900;
+  letter-spacing: -.07em;
+  line-height: .82;
+  transform: translateY(-3px);
+  white-space: nowrap;
+}
+
+.auth-logo .wordmark-letters { font-size: clamp(2.1rem, 9vw, 2.9rem); }
 
 .auth-card h1 { font-size: 2rem; letter-spacing: -.045em; margin: 0 0 .55rem; }
 .form-intro { color: var(--muted); line-height: 1.55; margin: 0 0 1.8rem; }
@@ -119,6 +143,13 @@ textarea:focus, select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px 
 .dashboard-main { margin: clamp(5rem, 13vh, 9rem) auto; max-width: 1000px; }
 .sidebar { background: rgb(13 13 13 / 96%); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; padding: 1rem; position: sticky; top: 0; width: 248px; z-index: 20; }
 .sidebar-closed .sidebar { width: 72px; }
+.sidebar-brand { align-items: center; display: flex; height: 58px; justify-content: center; margin: 0 0 1rem; overflow: hidden; text-decoration: none; }
+.sidebar-wordmark { align-items: flex-end; display: flex; gap: .06rem; }
+.sidebar-wordmark .wordmark-glyph { height: 44px; object-fit: contain; width: 44px; }
+.sidebar-wordmark .wordmark-letters { font-size: 1.42rem; transform: translateY(-2px); }
+.sidebar-mark { display: none; height: 42px; width: 42px; }
+.sidebar-closed .sidebar-wordmark { display: none; }
+.sidebar-closed .sidebar-mark { display: block; }
 .sidebar svg { fill: none; flex: 0 0 22px; height: 22px; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 22px; }
 .sidebar-item { align-items: center; background: transparent; border: 0; border-radius: 9px; color: var(--muted); display: flex; gap: .85rem; min-height: 44px; padding: .65rem .75rem; text-align: left; text-decoration: none; white-space: nowrap; width: 100%; }
 .sidebar-item:hover { background: #1a1a1a; color: var(--text); }
@@ -239,6 +270,8 @@ textarea:focus, select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px 
   .sidebar { box-shadow: 16px 0 50px rgb(0 0 0 / 55%); left: 0; position: fixed; transition: transform .25s ease; width: min(82vw, 280px); }
   .sidebar-closed .sidebar { transform: translateX(-100%); width: min(82vw, 280px); }
   .sidebar-closed .sidebar span { display: inline; }
+  .sidebar-closed .sidebar-wordmark { display: block; }
+  .sidebar-closed .sidebar-mark { display: none; }
   .sidebar-edge-toggle { left: min(82vw, 280px); }
   .sidebar-closed .sidebar-edge-toggle { left: 0; }
   .sidebar-scrim { background: rgb(0 0 0 / 55%); border: 0; display: block; inset: 0; padding: 0; position: fixed; z-index: 15; }

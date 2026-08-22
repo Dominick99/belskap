@@ -56,8 +56,8 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres18_data:/var/lib/postgresql
 
 volumes:
-  postgres_data:
+  postgres18_data:
   media_data:

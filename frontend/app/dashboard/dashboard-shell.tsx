@@ -34,6 +34,10 @@ export function DashboardShell({ children, email }: DashboardShellProps) {
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0M19 5v6M16 8h6" /></svg>
             <span>Avatars</span>
           </Link>
+          <Link className={`sidebar-item ${pathname.startsWith("/dashboard/tools") ? "active" : ""}`} href="/dashboard/tools">
+            <div className="tools-nav-icon" aria-hidden="true"><i /><i /><i /><i /></div>
+            <span>Tools</span>
+          </Link>
         </nav>
 
         <div className="sidebar-footer">

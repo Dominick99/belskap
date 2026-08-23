@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     CheckConstraint,
+    BigInteger,
     DateTime,
     ForeignKey,
     Float,
@@ -29,6 +30,96 @@ class User(Base):
     )
     avatars: Mapped[list["Avatar"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"
+    )
+    credit_wallet: Mapped["CreditWallet | None"] = relationship(
+        back_populates="user", cascade="all, delete-orphan", uselist=False
+    )
+
+
+class CreditWallet(Base):
+    __tablename__ = "credit_wallets"
+    __table_args__ = (
+        CheckConstraint("balance >= 0", name="ck_credit_wallets_balance_nonnegative"),
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    balance: Mapped[int] = mapped_column(BigInteger, default=0, server_default="0")
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    user: Mapped[User] = relationship(back_populates="credit_wallet")
+    transactions: Mapped[list["CreditTransaction"]] = relationship(
+        back_populates="wallet", cascade="all, delete-orphan"
+    )
+
+
+class CreditTransaction(Base):
+    __tablename__ = "credit_transactions"
+    __table_args__ = (
+        CheckConstraint("amount != 0", name="ck_credit_transactions_amount_nonzero"),
+        CheckConstraint(
+            "kind IN ('grant', 'purchase', 'refund', 'inference_charge', 'adjustment')",
+            name="ck_credit_transactions_kind",
+        ),
+        UniqueConstraint(
+            "user_id", "idempotency_key", name="uq_credit_transactions_user_id_key"
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("credit_wallets.user_id", ondelete="CASCADE"), index=True
+    )
+    amount: Mapped[int] = mapped_column(BigInteger)
+    balance_after: Mapped[int] = mapped_column(BigInteger)
+    kind: Mapped[str] = mapped_column(String(30))
+    idempotency_key: Mapped[str] = mapped_column(String(255))
+    reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    wallet: Mapped[CreditWallet] = relationship(back_populates="transactions")
+
+
+class CreditPurchase(Base):
+    __tablename__ = "credit_purchases"
+    __table_args__ = (
+        CheckConstraint("credits > 0", name="ck_credit_purchases_credits_positive"),
+        CheckConstraint(
+            "amount_total IS NULL OR amount_total >= 0",
+            name="ck_credit_purchases_amount_nonnegative",
+        ),
+        CheckConstraint(
+            "status IN ('creating', 'open', 'paid', 'failed', 'expired', 'refunded')",
+            name="ck_credit_purchases_status",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    package_id: Mapped[str] = mapped_column(String(50))
+    credits: Mapped[int] = mapped_column(BigInteger)
+    stripe_price_id: Mapped[str] = mapped_column(String(255))
+    stripe_checkout_session_id: Mapped[str | None] = mapped_column(
+        String(255), unique=True, nullable=True
+    )
+    stripe_payment_intent_id: Mapped[str | None] = mapped_column(
+        String(255), nullable=True
+    )
+    amount_total: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="creating")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
 

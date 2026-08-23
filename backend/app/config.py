@@ -20,6 +20,21 @@ class Settings(BaseSettings):
     s3_secret_key: str = Field(default="minioadmin", validation_alias="S3_SECRET_KEY")
     s3_bucket: str = Field(default="belskap-media", validation_alias="S3_BUCKET")
     s3_region: str = Field(default="us-east-1", validation_alias="S3_REGION")
+    frontend_url: str = Field(
+        default="http://localhost:3000", validation_alias="FRONTEND_URL"
+    )
+    stripe_secret_key: str | None = Field(
+        default=None, validation_alias="STRIPE_SECRET_KEY"
+    )
+    stripe_webhook_secret: str | None = Field(
+        default=None, validation_alias="STRIPE_WEBHOOK_SECRET"
+    )
+    stripe_starter_price_id: str | None = Field(
+        default=None, validation_alias="STRIPE_STARTER_PRICE_ID"
+    )
+    stripe_starter_credits: int = Field(
+        default=1000, gt=0, validation_alias="STRIPE_STARTER_CREDITS"
+    )
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

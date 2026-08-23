@@ -46,6 +46,24 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class CreditBalanceResponse(BaseModel):
+    balance: int
+    unit: str = "credit"
+
+
+class CreditPackageResponse(BaseModel):
+    id: str
+    credits: int
+
+
+class CheckoutSessionCreate(BaseModel):
+    package_id: str = Field(min_length=1, max_length=50)
+
+
+class CheckoutSessionResponse(BaseModel):
+    checkout_url: str
+
+
 class AvatarVisibility(StrEnum):
     PRIVATE = "private"
     UNLISTED = "unlisted"

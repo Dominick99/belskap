@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user
-from app.models import User
+from app.models import CreditWallet, User
 from app.schemas import TokenResponse, UserCreate, UserLogin, UserResponse
 from app.security import (
     create_access_token,
@@ -41,6 +41,8 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)) -> User:
         password_hash=hash_password(payload.password),
     )
     db.add(user)
+    db.flush()
+    db.add(CreditWallet(user_id=user.id))
 
     try:
         db.commit()
